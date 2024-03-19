@@ -3,6 +3,7 @@ package nachos.threads;
 import nachos.machine.*;
 
 import java.util.TreeSet;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -41,7 +42,7 @@ public class PriorityScheduler extends Scheduler {
      *					to the owning thread.
      * @return	a new priority thread queue.
      */
-    public ThreadQueue newThreadQueue(boolean transferPriority) {
+    public ThreadQueue newThreadQueue(boolean transferPriority) {    	
 	return new PriorityQueue(transferPriority);
     }
 
@@ -126,6 +127,8 @@ public class PriorityScheduler extends Scheduler {
      * A <tt>ThreadQueue</tt> that sorts threads by priority.
      */
     protected class PriorityQueue extends ThreadQueue {
+    private java.util.PriorityQueue<KThread> pq = new java.util.PriorityQueue<KThread>(new KTComparator());
+
 	PriorityQueue(boolean transferPriority) {
 	    this.transferPriority = transferPriority;
 	}
@@ -142,8 +145,7 @@ public class PriorityScheduler extends Scheduler {
 
 	public KThread nextThread() {
 	    Lib.assertTrue(Machine.interrupt().disabled());
-	    // implement me
-	    return null;
+	    return pq.poll();
 	}
 
 	/**
@@ -155,7 +157,7 @@ public class PriorityScheduler extends Scheduler {
 	 */
 	protected ThreadState pickNextThread() {
 	    // implement me
-	    return null;
+	    return getThreadState(pq.peek());
 	}
 	
 	public void print() {
@@ -168,7 +170,14 @@ public class PriorityScheduler extends Scheduler {
 	 * threads to the owning thread.
 	 */
 	public boolean transferPriority;
+
     }
+	private class KTComparator implements Comparator<KThread> {
+		@Override
+		public int compare(KThread kt1, KThread kt2) {
+			return getThreadState(kt2).priority - getThreadState(kt1).priority;
+		}
+	}
 
     /**
      * The scheduling state of a thread. This should include the thread's
