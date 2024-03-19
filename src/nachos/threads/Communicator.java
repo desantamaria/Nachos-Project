@@ -1,5 +1,7 @@
 package nachos.threads;
 
+import java.util.LinkedList;
+
 import nachos.machine.*;
 
 /**
@@ -7,15 +9,25 @@ import nachos.machine.*;
  */
 public class Communicator {
 
-    private boolean spoken = false;
-    private int word;
+    LinkedList<WaitingThread> speakingQueue = new LinkedList<WaitingThread>();
+    LinkedList<WaitingThread> listeningQueue = new LinkedList<WaitingThread>();
 
     private Lock lock;
-    private Condition2 conditon2;
 
     public Communicator() {
         lock = new Lock();
-        conditon2 = new Condition2(lock);
+    }
+
+    private static class WaitingThread {
+        private final Lock lock;
+        private final Condition condition;
+        private Integer word;
+
+        public WaitingThread(Integer word) {
+            this.word = word;
+            this.lock = new Lock();
+            this.condition = new Condition(this.lock);
+        }
     }
 
     /**
@@ -25,17 +37,25 @@ public class Communicator {
      * @param word the integer to transfer.
      */
     public void speak(int word) {
-        lock.acquire();
+        this.lock.acquire();
+        if (!listeningQueue.isEmpty()) {
+            WaitingThread listener = listeningQueue.pop();
+            word = listener.word;
 
-        while (spoken) {
-        	conditon2.sleep(); 
+            listener.lock.acquire();
+            listener.condition.wake();
+            listener.lock.release();
+        } else {
+            WaitingThread speaker = new WaitingThread(null);
+            speaker.lock.acquire();
+            listeningQueue.add(speaker);
+            this.lock.release();
+            speaker.condition.sleep();
+            this.lock.acquire();
+            word = speaker.word;
+            speaker.lock.release();
         }
-
-        this.word = word;
-        spoken = true;
-        conditon2.wake(); 
-
-        lock.release();
+        this.lock.release();
     }
 
     /**
@@ -45,18 +65,26 @@ public class Communicator {
      * @return the integer transferred.
      */
     public int listen() {
-        lock.acquire();
+        this.lock.acquire();
+        int word;
+        if (!speakingQueue.isEmpty()) {
+            WaitingThread speaker = speakingQueue.pop();
+            word = speaker.word;
 
-        while (!spoken) {
-        	conditon2.sleep(); 
+            speaker.lock.acquire();
+            speaker.condition.wake();
+            speaker.lock.release();
+        } else {
+            WaitingThread listener = new WaitingThread(null);
+            listener.lock.acquire();
+            listeningQueue.add(listener);
+            this.lock.release();
+            listener.condition.sleep();
+            this.lock.acquire();
+            word = listener.word;
+            listener.lock.release();
         }
-
-        int listenedWord = this.word;
-        spoken = false;
-        conditon2.wake(); 
-
-        lock.release();
-
-        return listenedWord;
+        this.lock.release();
+        return word;
     }
 }
