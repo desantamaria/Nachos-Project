@@ -128,6 +128,7 @@ public class PriorityScheduler extends Scheduler {
      */
     protected class PriorityQueue extends ThreadQueue {
     private java.util.PriorityQueue<KThread> pq = new java.util.PriorityQueue<KThread>(new KTComparator());
+    private ThreadState owner = null;
 
 	PriorityQueue(boolean transferPriority) {
 	    this.transferPriority = transferPriority;
@@ -135,11 +136,13 @@ public class PriorityScheduler extends Scheduler {
 
 	public void waitForAccess(KThread thread) {
 	    Lib.assertTrue(Machine.interrupt().disabled());
+	    pq.add(thread);
 	    getThreadState(thread).waitForAccess(this);
 	}
 
 	public void acquire(KThread thread) {
 	    Lib.assertTrue(Machine.interrupt().disabled());
+	    owner = getThreadState(thread);
 	    getThreadState(thread).acquire(this);
 	}
 
@@ -156,7 +159,6 @@ public class PriorityScheduler extends Scheduler {
 	 *		return.
 	 */
 	protected ThreadState pickNextThread() {
-	    // implement me
 	    return getThreadState(pq.peek());
 	}
 	
@@ -175,7 +177,7 @@ public class PriorityScheduler extends Scheduler {
 	private class KTComparator implements Comparator<KThread> {
 		@Override
 		public int compare(KThread kt1, KThread kt2) {
-			return getThreadState(kt2).priority - getThreadState(kt1).priority;
+			return getThreadState(kt2).getEffectivePriority() - getThreadState(kt1).getEffectivePriority();
 		}
 	}
 
@@ -245,7 +247,7 @@ public class PriorityScheduler extends Scheduler {
 	 * @see	nachos.threads.ThreadQueue#waitForAccess
 	 */
 	public void waitForAccess(PriorityQueue waitQueue) {
-	    // implement me
+		waitingFor = waitQueue;
 	}
 
 	/**
@@ -262,9 +264,11 @@ public class PriorityScheduler extends Scheduler {
 	    // implement me
 	}	
 
+	private int effectivePriority;
 	/** The thread with which this object is associated. */	   
 	protected KThread thread;
 	/** The priority of the associated thread. */
 	protected int priority;
+	private PriorityQueue waitingFor;
     }
 }
