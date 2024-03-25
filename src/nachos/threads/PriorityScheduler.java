@@ -2,10 +2,8 @@ package nachos.threads;
 
 import nachos.machine.*;
 
-import java.util.TreeSet;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
+
 
 /**
  * A scheduler that chooses threads based on their priorities.
@@ -142,13 +140,20 @@ public class PriorityScheduler extends Scheduler {
 
 	public void acquire(KThread thread) {
 	    Lib.assertTrue(Machine.interrupt().disabled());
-	    owner = getThreadState(thread);
-	    getThreadState(thread).acquire(this);
+	    
+	    if (transferPriority) {
+	    	owner = getThreadState(thread);
+		    getThreadState(thread).acquire(this);
+        }
 	}
 
 	public KThread nextThread() {
-	    Lib.assertTrue(Machine.interrupt().disabled());
-	    return pq.poll();
+	    Lib.assertTrue(Machine.interrupt().disabled());	    
+	    KThread nextThread = pq.poll();
+	    if(nextThread == null)
+	    	return null;
+	    owner = getThreadState(nextThread);
+	    return nextThread; 
 	}
 
 	/**
@@ -216,9 +221,12 @@ public class PriorityScheduler extends Scheduler {
 	 * @return	the effective priority of the associated thread.
 	 */
 	public int getEffectivePriority() {
-	    // implement me
-	    return priority;
+		return effectivePriority;
 	}
+	
+	public void updateEffectivePriority() {
+		
+    }
 
 	/**
 	 * Set the priority of the associated thread to the specified value.
@@ -226,12 +234,10 @@ public class PriorityScheduler extends Scheduler {
 	 * @param	priority	the new priority.
 	 */
 	public void setPriority(int priority) {
-	    if (this.priority == priority)
-		return;
-	    
-	    this.priority = priority;
-	    
-	    // implement me
+		 if (this.priority == priority)
+             return;
+         this.priority = priority;
+         updateEffectivePriority();
 	}
 
 	/**
@@ -247,7 +253,8 @@ public class PriorityScheduler extends Scheduler {
 	 * @see	nachos.threads.ThreadQueue#waitForAccess
 	 */
 	public void waitForAccess(PriorityQueue waitQueue) {
-		waitingFor = waitQueue;
+		  waitingFor = waitQueue;
+          updateEffectivePriority(); 
 	}
 
 	/**
@@ -261,7 +268,8 @@ public class PriorityScheduler extends Scheduler {
 	 * @see	nachos.threads.ThreadQueue#nextThread
 	 */
 	public void acquire(PriorityQueue waitQueue) {
-	    // implement me
+		waitingFor = null;
+        updateEffectivePriority(); 
 	}	
 
 	private int effectivePriority;

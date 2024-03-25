@@ -1,7 +1,6 @@
 package nachos.threads;
 
 import nachos.machine.*;
-import static nachos.threads.KThread.*;
 
 /**
  * A KThread is a thread that can be used to execute Nachos kernel code. Nachos
@@ -183,22 +182,19 @@ public class KThread {
      * delete this thread.
      */
     public static void finish() {
-        Lib.debug(dbgThread, "Finishing thread: " + currentThread.toString());
+	Lib.debug(dbgThread, "Finishing thread: " + currentThread.toString());
+	
+	Machine.interrupt().disable();
 
-        Machine.interrupt().disable();
+	Machine.autoGrader().finishingCurrentThread();
 
-        Machine.autoGrader().finishingCurrentThread();
+	Lib.assertTrue(toBeDestroyed == null);
+	toBeDestroyed = currentThread;
 
-        Lib.assertTrue(toBeDestroyed == null);
-        toBeDestroyed = currentThread;
 
-        currentThread.status = statusFinished;
-
-        currentThread.lock.acquire();
-        currentThread.waitingThreadsQ.wakeAll();
-        currentThread.lock.release();
-
-        sleep();
+	currentThread.status = statusFinished;
+	
+	sleep();
     }
 
     /**
@@ -277,12 +273,9 @@ public class KThread {
      * thread.
      */
     public void join() {
-        Lib.debug(dbgThread, "Joining to thread: " + toString());
-        Lib.assertTrue(this != currentThread);
+	Lib.debug(dbgThread, "Joining to thread: " + toString());
 
-        lock.acquire();
-        waitingThreadsQ.sleep();
-        lock.release();
+	Lib.assertTrue(this != currentThread);
 
     }
 
@@ -299,12 +292,7 @@ public class KThread {
 	Lib.assertTrue(idleThread == null);
 	
 	idleThread = new KThread(new Runnable() {
-	    public void run() { 
-	    	while (true) { 
-//	    		yield();
-	    		sleep();
-	    	}
-	    }
+	    public void run() { while (true) yield(); }
 	});
 	idleThread.setName("idle");
 
@@ -443,9 +431,7 @@ public class KThread {
     private String name = "(unnamed thread)";
     private Runnable target;
     private TCB tcb;
-    private Lock lock = new Lock();
-    private Condition2 waitingThreadsQ = new Condition2(lock);
-    
+
     /**
      * Unique identifer for this thread. Used to deterministically compare
      * threads.
