@@ -28,7 +28,6 @@ public class ThreadGrader4 extends BasicTestGrader
   {
     assertTrue(ThreadedKernel.scheduler instanceof RoundRobinScheduler,
       "this test requires roundrobin scheduler");
-
     
     /*
      * Test ThreadGrader4.a: Tests waitUntil to ensure it waits at least minimum
@@ -37,7 +36,6 @@ public class ThreadGrader4 extends BasicTestGrader
     count = 0;
     total = 1;
     forkNewThread(new PingTest(500));
-    
     while (count != total)
     {
       assertTrue(Machine.timer().getTime() < 2500,
@@ -59,6 +57,7 @@ public class ThreadGrader4 extends BasicTestGrader
         "Too many ticks wasted on \nTest ThreadGrader4.b");
       KThread.yield();
     }
+    done();
   }
   
   private class PingTest implements Runnable
@@ -68,13 +67,11 @@ public class ThreadGrader4 extends BasicTestGrader
     PingTest (int time)
     {
       wakeTick = Machine.timer().getTime() + time;
-            
       ThreadedKernel.alarm.waitUntil(time);
     }
     
     public void run ()
     {
-
       assertTrue(Machine.timer().getTime() > wakeTick,
         "wake up at a wrong time");
       ++count;

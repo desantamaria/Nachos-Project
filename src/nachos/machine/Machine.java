@@ -171,7 +171,7 @@ public final class Machine {
 	timer = new Timer(privilege);
 
 	if (Config.getBoolean("Machine.bank"))
-	    bank = new ElevatorBank(privilege);
+//	    bank = new ElevatorBank(privilege);
 
 	if (Config.getBoolean("Machine.processor")) {
 	    if (numPhysPages == -1)
@@ -200,12 +200,12 @@ public final class Machine {
 	Class clsKernel = Lib.loadClass("nachos.machine.Kernel");
 	Class clsFileSystem = Lib.loadClass("nachos.machine.FileSystem");
 	Class clsRiderControls = Lib.loadClass("nachos.machine.RiderControls");
-	Class clsElevatorControls =
-	    Lib.loadClass("nachos.machine.ElevatorControls");
+//	Class clsElevatorControls =
+//	    Lib.loadClass("nachos.machine.ElevatorControls");
 	Class clsRiderInterface =
 	    Lib.loadClass("nachos.machine.RiderInterface");
-	Class clsElevatorControllerInterface =
-	    Lib.loadClass("nachos.machine.ElevatorControllerInterface");
+//	Class clsElevatorControllerInterface =
+//	    Lib.loadClass("nachos.machine.ElevatorControllerInterface");
 
 	Class clsAlarm = Lib.loadClass("nachos.threads.Alarm");
 	Class clsThreadedKernel =
@@ -217,8 +217,8 @@ public final class Machine {
 	Class clsCondition = Lib.loadClass("nachos.threads.Condition");
 	Class clsCondition2 = Lib.loadClass("nachos.threads.Condition2");
 	Class clsRider = Lib.loadClass("nachos.threads.Rider");
-	Class clsElevatorController =
-	    Lib.loadClass("nachos.threads.ElevatorController");
+//	Class clsElevatorController =
+//	    Lib.loadClass("nachos.threads.ElevatorController");
 
 	Lib.checkDerivation(clsThreadedKernel, clsKernel);
 	
@@ -280,12 +280,12 @@ public final class Machine {
 	Lib.checkMethod(clsRider, "initialize",
 			new Class[] { clsRiderControls, aclsInt }, void.class);
 
-	Lib.checkDerivation(clsElevatorController,
-			    clsElevatorControllerInterface);
-
-	Lib.checkConstructor(clsElevatorController, new Class[] { });
-	Lib.checkMethod(clsElevatorController, "initialize",
-			new Class[] { clsElevatorControls }, void.class);
+//	Lib.checkDerivation(clsElevatorController,
+//			    clsElevatorControllerInterface);
+//
+//	Lib.checkConstructor(clsElevatorController, new Class[] { });
+//	Lib.checkMethod(clsElevatorController, "initialize",
+//			new Class[] { clsElevatorControls }, void.class);
     }
 
     /**
@@ -314,7 +314,7 @@ public final class Machine {
      * @return	the hardware elevator bank, or <tt>null</tt> if it is not
      * 		present.
      */
-    public static ElevatorBank bank() { return bank; }
+//    public static ElevatorBank bank() { return bank; }
     
     /**
      * Return the MIPS processor.
@@ -353,7 +353,7 @@ public final class Machine {
 
     private static Interrupt interrupt = null;
     private static Timer timer = null;
-    private static ElevatorBank bank = null;
+//    private static ElevatorBank bank = null;
     private static Processor processor = null;
     private static SerialConsole console = null;
     private static FileSystem stubFileSystem = null;

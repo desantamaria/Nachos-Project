@@ -6,6 +6,7 @@ import nachos.security.*;
 import nachos.threads.KThread;
 
 import java.util.Vector;
+import java.security.PrivilegedAction;
 
 /**
  * A TCB simulates the low-level details necessary to create, context-switch,
