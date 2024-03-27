@@ -88,6 +88,8 @@ public class ThreadGrader6 extends BasicTestGrader
     ThreadedKernel.scheduler.setPriority(t4, 3);
     
     if (ThreadedKernel.scheduler.getEffectivePriority(t1) != 3) {
+//    	System.out.print(ThreadedKernel.scheduler.getEffectivePriority(t1));
+
     	System.out.print("\n------------------------------------------");
         System.out.println("\nPriority not correctly donated.");
     	System.out.print("\n------------------------------------------\n");
